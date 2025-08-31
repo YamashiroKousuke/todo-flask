@@ -1,0 +1,30 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Test/coverage
+.pytest_cache/
+.tox/
+.coverage
+coverage.xml
+
+# App data
+todos.json

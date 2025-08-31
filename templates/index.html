@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}ToDo - 一覧{% endblock %}
+{% block content %}
+  <div class="row g-3 align-items-end mb-3">
+    <div class="col-md-7">
+      <form class="card card-body" method="post" action="{{ url_for('add', filter=kind) }}">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-7">
+            <label class="form-label">タイトル</label>
+            <input name="title" class="form-control" placeholder="タスクを入力" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">期日</label>
+            <input name="due" class="form-control" type="date">
+          </div>
+          <div class="col-md-2 d-grid">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i>追加</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-5">
+      <div class="card card-body">
+        <div class="btn-group" role="group">
+          <a class="btn btn-outline-secondary{% if kind=='pending' %} active{% endif %}" href="{{ url_for('index', filter='pending') }}">未完了</a>
+          <a class="btn btn-outline-secondary{% if kind=='all' %} active{% endif %}" href="{{ url_for('index', filter='all') }}">すべて</a>
+          <a class="btn btn-outline-secondary{% if kind=='done' %} active{% endif %}" href="{{ url_for('index', filter='done') }}">完了</a>
+        </div>
+        <div class="mt-2 small text-secondary">期限切れ: {{ stats.overdue }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 48px;">ID</th>
+            <th>タイトル</th>
+            <th style="width: 140px;">期日</th>
+            <th style="width: 120px;">状態</th>
+            <th style="width: 200px;">作成</th>
+            <th style="width: 220px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% if tasks %}
+          {% for t in tasks %}
+            {% set is_overdue = (not t.completed) and t.due and (t.due < today) %}
+            <tr class="{% if is_overdue %}overdue{% endif %}">
+              <td class="text-muted">#{{ t.id }}</td>
+              <td class="{% if t.completed %}text-secondary line-through{% endif %}">{{ t.title }}</td>
+              <td>{% if t.due %}{{ t.due }}{% else %}-{% endif %}</td>
+              <td>
+                {% if t.completed %}
+                  <span class="badge text-bg-success"><i class="bi bi-check2"></i> 完了</span>
+                {% else %}
+                  <span class="badge text-bg-warning"><i class="bi bi-hourglass-split"></i> 未完了</span>
+                {% endif %}
+              </td>
+              <td>
+                {{ t.created_at.replace('T',' ').rstrip('Z') }}
+              </td>
+              <td>
+                <div class="d-flex gap-2">
+                  {% if t.completed %}
+                    <form method="post" action="{{ url_for('toggle', task_id=t.id, act='undone', filter=kind) }}">
+                      <button class="btn btn-outline-secondary btn-sm" type="submit"><i class="bi bi-arrow-counterclockwise"></i> 戻す</button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="{{ url_for('toggle', task_id=t.id, act='done', filter=kind) }}">
+                      <button class="btn btn-success btn-sm" type="submit"><i class="bi bi-check2"></i> 完了</button>
+                    </form>
+                  {% endif %}
+                  <a class="btn btn-primary btn-sm" href="{{ url_for('edit', task_id=t.id, filter=kind) }}"><i class="bi bi-pencil"></i> 編集</a>
+                  <form method="post" action="{{ url_for('delete', task_id=t.id, filter=kind) }}" onsubmit="return confirm('削除しますか？');">
+                    <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-trash"></i> 削除</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="text-center text-secondary py-4">タスクはありません</td>
+          </tr>
+        {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
