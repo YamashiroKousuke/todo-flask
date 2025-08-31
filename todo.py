@@ -119,10 +119,12 @@ def list_tasks(kind: str) -> List[Task]:
     # else 'all' -> no filter
     # Sort pending by due date (None last), then created_at; done by completed_at desc
     if kind in ("pending", "all"):
-        tasks.sort(key=lambda t: (
-            (t.due is None, t.due or "9999-12-31"),
-            t.created_at,
-        ))
+        tasks.sort(
+            key=lambda t: (
+                (t.due is None, t.due or "9999-12-31"),
+                t.created_at,
+            )
+        )
     elif kind == "done":
         tasks.sort(key=lambda t: t.completed_at or "", reverse=True)
     return tasks
@@ -151,7 +153,9 @@ def delete_tasks(ids: List[int]) -> int:
     return before - after
 
 
-def edit_task(id_: int, title: Optional[str], due: Optional[str], clear_due: bool, undone: bool) -> Optional[Task]:
+def edit_task(
+    id_: int, title: Optional[str], due: Optional[str], clear_due: bool, undone: bool
+) -> Optional[Task]:
     data = load_data()
     for raw in data["tasks"]:
         if int(raw["id"]) == id_:
@@ -206,13 +210,15 @@ def format_tasks(tasks: List[Task]) -> str:
     rows = []
     for t in tasks:
         status = "done" if t.completed else "pending"
-        rows.append([
-            str(t.id),
-            t.title,
-            t.due or "-",
-            status,
-            t.created_at.replace("T", " ").rstrip("Z"),
-        ])
+        rows.append(
+            [
+                str(t.id),
+                t.title,
+                t.due or "-",
+                status,
+                t.created_at.replace("T", " ").rstrip("Z"),
+            ]
+        )
 
     widths = [len(h) for h in headers]
     for r in rows:
@@ -239,7 +245,9 @@ def build_parser() -> argparse.ArgumentParser:
     g = pl.add_mutually_exclusive_group()
     g.add_argument("--all", action="store_true", help="Show all tasks")
     g.add_argument("--done", action="store_true", help="Show completed tasks")
-    g.add_argument("--pending", action="store_true", help="Show pending tasks (default)")
+    g.add_argument(
+        "--pending", action="store_true", help="Show pending tasks (default)"
+    )
 
     pd = sub.add_parser("done", help="Mark task(s) as done")
     pd.add_argument("ids", nargs="+", type=int, help="Task id(s)")
@@ -325,4 +333,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
